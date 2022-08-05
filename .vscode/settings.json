@@ -1,0 +1,9 @@
+{
+    "python.linting.pylintEnabled": false,
+    "python.linting.enabled": true,
+    "python.autoComplete.extraPaths": [
+    
+    ],
+    "python.analysis.extraPaths": [],
+    "python.linting.flake8Enabled": true
+}
