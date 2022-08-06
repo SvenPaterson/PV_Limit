@@ -7,6 +7,8 @@ from datetime import timedelta
 
 def get_torque_data(raw_data_path):
     file_list = [f for f in os.listdir(raw_data_path) if f.endswith(".txt")]
+    if not len(file_list):
+        raise ValueError("There is no torque data file available to process")
     if len(file_list) > 1:
         raise ValueError("This script cannot process more than one torque data"
                          " file at a time")

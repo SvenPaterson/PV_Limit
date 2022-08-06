@@ -11,6 +11,8 @@ pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 def get_FLIR_data(raw_data_path, crop_data_path, output=''):
     file_list = [f for f in os.listdir(raw_data_path) if f.endswith(".jpg")]
+    if not len(file_list):
+        raise ValueError("There are no FLIR img files available to process")
     results = {"timestamp": [], "temp": []}
     fail_list = []
     for i, file in enumerate(file_list):
