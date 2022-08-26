@@ -54,8 +54,13 @@ def main():
                   color='dodgerblue',
                   label='Outlet Temp')
 
+    l6 = ax2.plot(omega_data['Date_Time'],
+                  omega_data['T3']-omega_data['T2'],
+                  color='black',
+                  label='deltaTemp')
+
     # create legend for all traces
-    lns = l1+l2+l3+l4+l5
+    lns = l1+l2+l3+l4+l5+l6
     labs = [line.get_label() for line in lns]
     ax1.legend(lns, labs, loc="best")
 
