@@ -11,14 +11,15 @@ from tkinter import filedialog
 
 
 def main():
+    #  --------------- SETUP PROJECT ---------------  #
     root = tk.Tk()
     root.withdraw()
     root_dir = os.path.join(sys.path[0], 'raw_data')
     data_path = filedialog.askdirectory(title="Select Project Folder",
-                                            initialdir=root_dir)
+                                        initialdir=root_dir)
     cropped_data_path = os.path.join(data_path, 'cropped_data')
     if not os.path.exists(cropped_data_path):
-                os.makedirs(cropped_data_path)
+        os.makedirs(cropped_data_path)
 
     #  ---------------- IMPORT DATA ----------------  #
     try:
