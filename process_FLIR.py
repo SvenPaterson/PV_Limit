@@ -20,7 +20,6 @@ def get_FLIR_data(raw_data_path, crop_data_path):
     prev_data = os.path.join(raw_data_path, file_list[0].removesuffix('.jpg'))
     
     try:
-        print(prev_data)
         df = pickle.load(open(f'{prev_data}.pickle', 'rb'))
 
     except:

@@ -2,30 +2,37 @@ import sys
 import os
 import matplotlib
 import matplotlib.pyplot as plt
+import tkinter as tk
 
 from process_FLIR import get_FLIR_data
 from process_futek import get_torque_data
 from process_Omega import get_Omega_data
+from tkinter import filedialog
 
 
 def main():
-    root = sys.path[0]
-    raw_data_path = os.path.join(root, 'raw_data')
-    cropped_data_path = os.path.join(root, 'cropped_data')
+    root = tk.Tk()
+    root.withdraw()
+    root_dir = os.path.join(sys.path[0], 'raw_data')
+    data_path = filedialog.askdirectory(title="Select Project Folder",
+                                            initialdir=root_dir)
+    cropped_data_path = os.path.join(data_path, 'cropped_data')
+    if not os.path.exists(cropped_data_path):
+                os.makedirs(cropped_data_path)
 
     #  ---------------- IMPORT DATA ----------------  #
     try:
-        torque_data = get_torque_data(raw_data_path)
+        torque_data = get_torque_data(data_path)
         print('Torque data import successful')
     except:
         raise ValueError('Torque data import unsuccessful')
     try:
-        omega_data = get_Omega_data(raw_data_path)
+        omega_data = get_Omega_data(data_path)
         print('Thermocouple data import successful')
     except:
         raise ValueError('Thermocouple data import unsuccessful')
     try:
-        flir_data = get_FLIR_data(raw_data_path, cropped_data_path)
+        flir_data = get_FLIR_data(data_path, cropped_data_path)
         print('FLIR Camera image processing / import successful')
     except:
         raise ValueError('FLIR Camera image processing / import unsuccessful')
