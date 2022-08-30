@@ -13,12 +13,22 @@ def main():
     raw_data_path = os.path.join(root, 'raw_data')
     cropped_data_path = os.path.join(root, 'cropped_data')
 
-    torque_data = get_torque_data(raw_data_path)
-    print(torque_data, torque_data.info())
-    omega_data = get_Omega_data(raw_data_path)
-    print(omega_data, omega_data.info())
-    flir_data = get_FLIR_data(raw_data_path, cropped_data_path)
-    print(flir_data, flir_data.info())
+    #  ---------------- IMPORT DATA ----------------  #
+    try:
+        torque_data = get_torque_data(raw_data_path)
+        print('Torque data import successful')
+    except:
+        raise ValueError('Torque data import unsuccessful')
+    try:
+        omega_data = get_Omega_data(raw_data_path)
+        print('Thermocouple data import successful')
+    except:
+        raise ValueError('Thermocouple data import unsuccessful')
+    try:
+        flir_data = get_FLIR_data(raw_data_path, cropped_data_path)
+        print('FLIR Camera image processing / import successful')
+    except:
+        raise ValueError('FLIR Camera image processing / import unsuccessful')
 
     #  ------------------ PLOT DATA ------------------  #
     # fig, [ax1, ax2] = plt.subplots(nrows=2, ncols=1)
