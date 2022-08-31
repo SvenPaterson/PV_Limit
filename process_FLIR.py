@@ -57,7 +57,6 @@ def get_FLIR_data(raw_data_path, crop_data_path):
                     t = float(string[:4])
                     results['temp'].append(t)
                     results['timestamp'].append(date_time)
-                    print('temp read as: ', string[:4], 'degF')
                 except ValueError:
                     fail_list.append(file)
                     print(string[:4], 'failed')
@@ -73,13 +72,12 @@ def get_FLIR_data(raw_data_path, crop_data_path):
         if fail_list:
             print('\nOCR failed on the following files:\n', fail_list)
 
-        else:
-            df = pd.DataFrame(results)
-            df.timestamp = pd.to_datetime(df.timestamp,
-                                        format='%Y:%m:%d %H:%M:%S')
-            df.rename(columns={'timestamp': 'Date_Time',
-                               'temp': 'Temperature, degF'},
-                    inplace=True)
-            df.to_pickle(os.path.join(raw_data_path,(prev_data)+'.pickle'))
+        df = pd.DataFrame(results)
+        df.timestamp = pd.to_datetime(df.timestamp,
+                                    format='%Y:%m:%d %H:%M:%S')
+        df.rename(columns={'timestamp': 'Date_Time',
+                            'temp': 'Temperature, degF'},
+                inplace=True)
+        df.to_pickle(os.path.join(raw_data_path,(prev_data)+'.pickle'))
     
     return df
