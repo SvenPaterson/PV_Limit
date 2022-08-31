@@ -17,8 +17,8 @@ def get_FLIR_data(raw_data_path, crop_data_path):
     results = {'timestamp': [], 'temp': []}
     fail_list = []
 
+    # check for previously processed data on current FLIR files
     prev_data = os.path.join(raw_data_path, file_list[0].removesuffix('.jpg'))
-    
     try:
         df = pickle.load(open(f'{prev_data}.pickle', 'rb'))
 
@@ -59,7 +59,7 @@ def get_FLIR_data(raw_data_path, crop_data_path):
                     results['timestamp'].append(date_time)
                 except ValueError:
                     fail_list.append(file)
-                    print(string[:4], 'failed')
+                    print(string[:4], 'failed, please wait...')
             else:
                 try:
                     t = float(string[:3])
@@ -67,17 +67,19 @@ def get_FLIR_data(raw_data_path, crop_data_path):
                     results['timestamp'].append(date_time)
                 except ValueError:
                     fail_list.append(file)
-                    print(string[:3], 'failed')
+                    print(string[:3], 'failed, please wait...')
 
+        print("\n[Processing Complete]\n")
         if fail_list:
-            print('\nOCR failed on the following files:\n', fail_list)
+            print(f"\nOCR failed on: {len(fail_list)} out of", end=' ')
+            print(f"{results['temp'].size} processed files\n")
 
         df = pd.DataFrame(results)
         df.timestamp = pd.to_datetime(df.timestamp,
                                     format='%Y:%m:%d %H:%M:%S')
         df.rename(columns={'timestamp': 'Date_Time',
-                            'temp': 'Temperature, degF'},
-                inplace=True)
-        df.to_pickle(os.path.join(raw_data_path,(prev_data)+'.pickle'))
+                           'temp': 'Temperature, degF'},
+                           inplace=True)
+        df.to_pickle(os.path.join(raw_data_path, prev_data+'.pickle'))
     
     return df
