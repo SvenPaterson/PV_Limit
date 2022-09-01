@@ -49,7 +49,7 @@ def get_torque_data(raw_data_path):
             df = torque_file_to_df(file, sep)
         else:
             next_df = torque_file_to_df(file, sep)
-            df= pd.concat([df, next_df], ignore_index=True)
+            df = pd.concat([df, next_df], ignore_index=True)
     df.sort_values(by=['Date_Time'], ignore_index=True, inplace=True)
     # display positive torque
     df['Torque, Nm'] = df['Torque, Nm'].multiply(other=-1)
