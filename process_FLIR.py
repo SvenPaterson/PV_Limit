@@ -70,9 +70,6 @@ def get_FLIR_data(raw_data_path, crop_data_path):
                     print(string[:3], 'failed, please wait...')
 
         print("\n[Processing Complete]\n")
-        if fail_list:
-            print(f"\nOCR failed on: {len(fail_list)} out of", end=' ')
-            print(f"{results['temp'].size} processed files\n")
 
         df = pd.DataFrame(results)
         df.timestamp = pd.to_datetime(df.timestamp,
@@ -81,5 +78,7 @@ def get_FLIR_data(raw_data_path, crop_data_path):
                            'temp': 'Temperature, degF'},
                            inplace=True)
         df.to_pickle(os.path.join(raw_data_path, prev_data+'.pickle'))
-    
+        if fail_list:
+            print(f"\nOCR failed on: {len(fail_list)} out of", end=' ')
+            print(f"{len(results['temp'])} processed files\n")
     return df

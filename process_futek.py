@@ -17,10 +17,9 @@ def torque_file_to_df(file, sep):
         if sep == '\t':
             sample_rate = int(row[0].split('"')[1])
         
-    df = pd.read_csv(file, sep=sep,
-                    header=23,
-                    index_col='Sample Number',
-                    parse_dates=[['Date', 'Time']])
+    df = pd.read_csv(file, sep=sep, header=23,
+                     index_col='Sample Number',
+                     parse_dates=[['Date', 'Time']])
     df.drop(columns=df.columns[-1], axis=1, inplace=True)
     df.rename(columns={'Tracking Value': 'Torque, Nm'}, inplace=True)
 

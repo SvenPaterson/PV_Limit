@@ -43,7 +43,7 @@ def main():
     fig, ax1 = plt.subplots()
     l1 = ax1.plot(torque_data["Date_Time"],
                   torque_data["Torque, Nm"],
-                  color='g',
+                  color='green',
                   label='Torque')
 
     ax1.set_xlabel('Timestamp')
@@ -76,9 +76,15 @@ def main():
                   omega_data['T3']-omega_data['T2'],
                   color='black',
                   label='deltaTemp')
+    
+    SMA = 20 # simple moving average window
+    l7 = ax1.plot(torque_data["Date_Time"],
+                  torque_data["Torque, Nm"].rolling(window=SMA).mean(),
+                  color='lime',
+                  label=f'SMA{SMA} - Torque')
 
     # create legend for all traces
-    lns = l1+l2+l3+l4+l5+l6
+    lns = l1+l7+l2+l3+l4+l5+l6
     labs = [line.get_label() for line in lns]
     ax1.legend(lns, labs, loc="best")
 
