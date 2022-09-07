@@ -20,23 +20,24 @@ def main():
     cropped_data_path = os.path.join(data_path, 'cropped_data')
     if not os.path.exists(cropped_data_path):
         os.makedirs(cropped_data_path)
-
+    print("\nImporting of Data has begun, please wait...\n")
+    
     #  ---------------- IMPORT DATA ----------------  #
     try:
         torque_data = get_torque_data(data_path)
-        print('Torque data import successful')
+        print('Torque data import successful\n')
     except:
-        raise ValueError('Torque data import unsuccessful')
+        raise ValueError('Torque data import unsuccessful\n')
     try:
         omega_data = get_Omega_data(data_path)
-        print('Thermocouple data import successful')
+        print('Thermocouple data import successful\n')
     except:
-        raise ValueError('Thermocouple data import unsuccessful')
+        raise ValueError('Thermocouple data import unsuccessful\n')
     try:
         flir_data = get_FLIR_data(data_path, cropped_data_path)
-        print('FLIR Camera image processing / import successful')
+        print('FLIR Camera image processing / import successful\n')
     except:
-        raise ValueError('FLIR Camera image processing / import unsuccessful')
+        raise ValueError('FLIR Camera image processing / import unsuccessful\n')
 
     #  ------------------ PLOT DATA ------------------  #
     # fig, [ax1, ax2] = plt.subplots(nrows=2, ncols=1)

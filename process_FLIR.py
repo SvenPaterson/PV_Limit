@@ -58,7 +58,7 @@ def get_FLIR_data(raw_data_path, crop_data_path):
                     results['timestamp'].append(date_time)
                 except ValueError:
                     fail_list.append(file)
-                    print(string[:4], 'failed, please wait...')
+                    print(string[:4], '\tfailed, please wait...')
             else:
                 try:
                     t = float(string[:3])
@@ -66,7 +66,7 @@ def get_FLIR_data(raw_data_path, crop_data_path):
                     results['timestamp'].append(date_time)
                 except ValueError:
                     fail_list.append(file)
-                    print(string[:3], 'failed, please wait...')
+                    print(string[:3], '\tfailed, please wait...')
 
         print("\n[Processing Complete]\n")
 
