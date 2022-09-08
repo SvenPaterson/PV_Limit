@@ -1,4 +1,1 @@
 *.pyc
-__pycache__/process_FLIR.cpython-310.pyc
-__pycache__/process_futek.cpython-310.pyc
-__pycache__/process_Omega.cpython-310.pyc
