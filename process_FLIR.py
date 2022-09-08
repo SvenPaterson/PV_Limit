@@ -80,7 +80,7 @@ def get_FLIR_data(raw_data_path, crop_data_path):
         df.rename(columns={'timestamp': 'Date_Time',
                            'temp': 'Temperature, degF'},
                            inplace=True)
-        df.to_pickle(os.path.join(raw_data_path, prev_data+'.pickle'))
+        df.to_pickle(os.path.join(raw_data_path, 'FLIR_data.pickle'))
 
         if fail_list:
             print(f"\nOCR failed on: {len(fail_list)} out of", end=' ')
