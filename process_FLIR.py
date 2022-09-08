@@ -10,19 +10,23 @@ pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 
 def get_FLIR_data(raw_data_path, crop_data_path):
+
     file_list = [f for f in os.listdir(raw_data_path) if f.endswith('.jpg')]
+    
     if not len(file_list):
-        raise ValueError('There are no FLIR img files available to process')
-    results = {'timestamp': [], 'temp': []}
-    fail_list = []
+        try:
+            prev_data_file = [f for f in os.listdir(raw_data_path) 
+                              if f.endswith('.pickle')]
+            prev_data_path = os.path.join(raw_data_path, prev_data_file[0])
+            df = pickle.load(open(prev_data_path, 'rb'))
+        except:
+            raise ValueError('There are no FLIR img files available to process')
+    
+    else:
+        print("Initial image processing required, please wait...")        
+        results = {'timestamp': [], 'temp': []}
+        fail_list = []
 
-    # check for previously processed data on current FLIR files
-    prev_data = os.path.join(raw_data_path, file_list[0].removesuffix('.jpg'))
-    try:
-        df = pickle.load(open(f'{prev_data}.pickle', 'rb'))
-
-    except:
-        print("Initial image processing required, please wait...")
         for i, file in enumerate(file_list):
             img = Image.open(os.path.join(raw_data_path, file))
 
@@ -77,7 +81,9 @@ def get_FLIR_data(raw_data_path, crop_data_path):
                            'temp': 'Temperature, degF'},
                            inplace=True)
         df.to_pickle(os.path.join(raw_data_path, prev_data+'.pickle'))
+
         if fail_list:
             print(f"\nOCR failed on: {len(fail_list)} out of", end=' ')
             print(f"{len(results['temp'])} processed files\n")
+
     return df

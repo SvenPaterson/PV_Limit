@@ -24,20 +24,23 @@ def main():
     
     #  ---------------- IMPORT DATA ----------------  #
     try:
+        print('\tImporting Torque data...')
         torque_data = get_torque_data(data_path)
-        print('Torque data import successful\n')
+        print('\t  Torque data import successful\n')
     except:
         raise ValueError('Torque data import unsuccessful\n')
     try:
+        print('\tImporting Thermocouple data...')
         omega_data = get_Omega_data(data_path)
-        print('Thermocouple data import successful\n')
+        print('\t  Thermocouple data import successful\n')
     except:
         raise ValueError('Thermocouple data import unsuccessful\n')
     try:
+        print('\tImporting FLIR Camera data...')
         flir_data = get_FLIR_data(data_path, cropped_data_path)
-        print('FLIR Camera image processing / import successful\n')
+        print('\t  FLIR Camera image processing/import successful\n')
     except:
-        raise ValueError('FLIR Camera image processing / import unsuccessful\n')
+        raise ValueError('FLIR Camera image processing/import unsuccessful\n')
 
     #  ------------------ PLOT DATA ------------------  #
     # fig, [ax1, ax2] = plt.subplots(nrows=2, ncols=1)
