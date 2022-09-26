@@ -1,12 +1,16 @@
 import os
 import pandas as pd
+from tqdm import tqdm
 
+def correctCSV(file_path):
+    with open(file_path, 'r') as f_in, open((file_path+'.csv'), 'w') as f_out:
+        header = f_in.readlines(1)[0]
+        f_out.write(header)
+        for line in f_in.readlines():
+            if line != header:
+                f_out.write(line)
 
 def XLStoDataframe(raw_data_path, file):
-    """ print(raw_data_path)
-    print("\n")
-    print(file)
-    print(os.path.join(raw_data_path, file)) """
     df = pd.read_csv(os.path.join(raw_data_path, file), sep='\t',
                      parse_dates=[['Date', 'Time']],
                      usecols=['Date', 'Time', 'Value', 'Value.1', 'Value.2'])
@@ -22,6 +26,12 @@ def get_Omega_data(raw_data_path):
     if not len(file_list):
         raise ValueError("No temperature data files found")
     for file in file_list:
+        correctCSV(os.path.join(raw_data_path,file))
+    file_list =[]
+    for f in os.listdir(raw_data_path):
+        if f.endswith(".csv") and f != 'fail_list.csv':
+            file_list.append(f)
+    for i, file in enumerate(file_list):
         if 'df' not in locals():
             df = XLStoDataframe(raw_data_path, file)
         else:

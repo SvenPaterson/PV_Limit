@@ -2,6 +2,7 @@ import os
 import csv
 import pandas as pd
 
+from tqdm import tqdm
 from datetime import timedelta
 
 
@@ -34,17 +35,17 @@ def torque_file_to_df(file, sep):
 
 def get_torque_data(raw_data_path):
     all_files = os.listdir(raw_data_path)
-    file_list = [f for f in all_files if f.endswith(('.txt', '.csv'))]
+    file_list = [f for f in all_files if f.endswith(('.txt'))]
     if not len(file_list):
-        raise ValueError('There is no torque data file available to process')
-    for file_path in file_list:
+        raise ValueError('\n\tThere is no torque data file available to process')
+    for file_path in tqdm(file_list):
         file = os.path.join(raw_data_path, file_path)
         if file_path.endswith(".txt"):
             sep = '\t'
         if file_path.endswith(".csv"):
             sep = ','
         if not file_path.endswith(".csv") and not file_path.endswith('.txt'): 
-            raise ValueError('Incorrect file type!')
+            raise ValueError('\n\tIncorrect file type!')
         if 'df' not in locals():
             df = torque_file_to_df(file, sep)
         else:
