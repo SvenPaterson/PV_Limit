@@ -4,7 +4,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import tkinter as tk
 
-from process_FLIR import get_FLIR_data
+from process_FLIR_v2 import get_FLIR_data
 from process_futek import get_torque_data
 from process_Omega import get_Omega_data
 from tkinter import filedialog
@@ -24,23 +24,26 @@ def main():
     
     #  ---------------- IMPORT DATA ----------------  #
     try:
-        print('\tImporting Torque data...')
-        torque_data = get_torque_data(data_path)
-        print('\t  Torque data import successful\n')
-    except:
-        raise ValueError('Torque data import unsuccessful\n')
-    try:
         print('\tImporting Thermocouple data...')
         omega_data = get_Omega_data(data_path)
         print('\t  Thermocouple data import successful\n')
     except:
-        raise ValueError('Thermocouple data import unsuccessful\n')
+        raise ValueError('\n\tThermocouple data import unsuccessful\n')
+    
     try:
         print('\tImporting FLIR Camera data...')
         flir_data = get_FLIR_data(data_path, cropped_data_path)
         print('\t  FLIR Camera image processing/import successful\n')
     except:
-        raise ValueError('FLIR Camera image processing/import unsuccessful\n')
+        raise ValueError('\n\tFLIR Camera image processing/import unsuccessful\n')
+    
+    try:
+        print('\tImporting Torque data...')
+        torque_data = get_torque_data(data_path)
+        print('\t  Torque data import successful\n')
+    except:
+        raise ValueError('\n\tTorque data import unsuccessful\n')
+
 
     #  ------------------ PLOT DATA ------------------  #
     # fig, [ax1, ax2] = plt.subplots(nrows=2, ncols=1)
@@ -55,6 +58,7 @@ def main():
     ax1.set_ylabel('Torque, Nm', color='g')
     ax2 = ax1.twinx()
     ax2.set_ylabel('Temperature, degF')
+    ax2.set_ylim(0, 400)
 
     l2 = ax2.plot(flir_data["Date_Time"],
                   flir_data["Temperature, degF"],
