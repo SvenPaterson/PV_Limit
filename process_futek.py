@@ -53,5 +53,6 @@ def get_torque_data(raw_data_path):
             df = pd.concat([df, next_df], ignore_index=True)
     df.sort_values(by=['Date_Time'], ignore_index=True, inplace=True)
     # display positive torque
-    df['Torque, Nm'] = df['Torque, Nm'].multiply(other=-1)
+    if df['Torque, Nm'].mean() < 0:
+        df['Torque, Nm'] = df['Torque, Nm'].multiply(other=-1)
     return df
