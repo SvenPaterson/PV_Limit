@@ -9,6 +9,8 @@ from process_futek import get_torque_data
 from process_Omega import get_Omega_data
 from tkinter import filedialog
 
+from torque_PSD import SAMPLE_RATE
+
 
 def main():
     #  --------------- SETUP PROJECT ---------------  #

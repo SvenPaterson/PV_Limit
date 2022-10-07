@@ -33,7 +33,7 @@ def get_FLIR_data(raw_data_path, crop_data_path):
     
     else:
         print("Initial image processing required, please wait...")        
-        results = {'timestamp': [], 'temp': []}
+        results = {'timestamp': [], 'temp': [], 'filename': []}
         fail_list = [("file, datetime, full string, float conversion attempt")]
 
         for file in tqdm(file_list):
@@ -77,19 +77,21 @@ def get_FLIR_data(raw_data_path, crop_data_path):
                 t = float(listToString(num[:3]))
                 results['temp'].append(t)
                 results['timestamp'].append(date_time)
+                results['filename'].append(file)
             except:
                 fail_list.append((f'{file}, {date_time}, {string}, {num}'))
-
+        
         df = pd.DataFrame(results)
         df.timestamp = pd.to_datetime(df.timestamp,
                                     format='%Y:%m:%d %H:%M:%S')
         df.rename(columns={'timestamp': 'Date_Time',
                         'temp': 'Temperature, degF'},
                         inplace=True)
+        df.sort_values(by=[df('timestamp')], inplace=True, ignore_index=True)
         df.to_pickle(os.path.join(raw_data_path, 'FLIR_data.pickle'))
 
         if len(fail_list) > 1:
-            print(f"\n[FAIL_LIST] OCR failed on: {len(fail_list)} out of", end=' ')
+            print(f"\n[FAIL_LIST] OCR failed on: {len(fail_list)-1} out of", end=' ')
             print(f"{len(results['temp'])} processed files\n")
             with open("fail_list.csv", 'w') as f_out:
                 for line in fail_list:
@@ -99,7 +101,7 @@ def get_FLIR_data(raw_data_path, crop_data_path):
             print(success_msg)
             with open(os.path.join(raw_data_path, "fail_list.csv"), 'w') as f_out:
                 f_out.write(success_msg)
-
+        
         print("\n[Processing Complete]\n")
-
+    print(df)
     return df

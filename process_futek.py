@@ -1,3 +1,4 @@
+from email import header
 import os
 import csv
 import pandas as pd
@@ -10,26 +11,52 @@ def torque_file_to_df(file, sep):
     # read sample rate of data file
     with open(file) as f:
         reader = csv.reader(f)
-        for i in range(21):
-            next(reader)
         row = next(reader)
-        if sep == ',':
-            sample_rate = int(row[1])
+        row_num = 1
+        while row != ['Sampling Rate\t']:
+            row = next(reader)
+            row_num += 1
+        next(reader)
+        row_num += 1
+        row = next(reader)
+        row_num +=1
+        
         if sep == '\t':
             sample_rate = int(row[0].split('"')[1])
         
-    df = pd.read_csv(file, sep=sep, header=23,
-                     index_col='Sample Number',
-                     parse_dates=[['Date', 'Time']])
-    df.drop(columns=df.columns[-1], axis=1, inplace=True)
-    df.rename(columns={'Tracking Value': 'Torque, Nm'}, inplace=True)
 
+        x = 0
+        while x < 10:
+            row = next(reader)
+            #print(row)
+            x += 1
+    if row_num > 23:
+        header_row = 25
+    else: 
+        header_row = 23
+    
+    if header_row > 23:
+        df = pd.read_csv(file, sep=sep, header=header_row,
+                         index_col='Sample Number')
+        df.drop(columns=df.columns[-2:], axis=1, inplace=True)
+        df.Date = pd.to_datetime(df.Date, infer_datetime_format=True)
+        df.rename(columns={'Date': 'Date_Time'}, inplace=True)
+    else:
+        df = pd.read_csv(file, sep=sep, header=header_row,
+                         index_col='Sample Number',
+                         parse_dates=[['Date', 'Time']])
+        df.drop(columns=df.columns[-1], axis=1, inplace=True)
+
+    df.rename(columns={'Tracking Value': 'Torque, Nm'}, inplace=True)
+    
     # ensure sample rate is added to date_time column
     trigger_time = df.iloc[0]['Date_Time']
-    time_delta = timedelta(milliseconds=1000/sample_rate)
+    if header_row > 23:
+        time_delta = df.iloc[1]['Date_Time'] - df.iloc[0]['Date_Time']
+    else: time_delta = timedelta(milliseconds=1000/sample_rate)
     total_time = [trigger_time+i*time_delta for i in range(0, df.shape[0])]
     df['Date_Time'] = pd.Series(total_time)
-    
+    #print(df)
     return df
 
 
