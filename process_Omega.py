@@ -13,10 +13,11 @@ def correctCSV(file_path):
 def XLStoDataframe(raw_data_path, file):
     df = pd.read_csv(os.path.join(raw_data_path, file), sep='\t',
                      parse_dates=[['Date', 'Time']],
-                     usecols=['Date', 'Time', 'Value', 'Value.1', 'Value.2'])
+                     usecols=['Date', 'Time', 'Value', 'Value.1', 'Value.2', 'Value.3'])
     df.rename(columns={'Value': 'T1',
                        'Value.1': 'T2',
-                       'Value.2': 'T3'},
+                       'Value.2': 'T3',
+                       'Value.3': 'T4'},
               inplace=True)
     return df
 

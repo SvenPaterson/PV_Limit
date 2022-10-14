@@ -60,7 +60,7 @@ def main():
     ax1.set_ylabel('Torque, Nm', color='g')
     ax2 = ax1.twinx()
     ax2.set_ylabel('Temperature, degF')
-    ax2.set_ylim(0, 400)
+    #ax2.set_ylim(0, 400)
 
     l2 = ax2.plot(flir_data["Date_Time"],
                   flir_data["Temperature, degF"],
@@ -70,31 +70,38 @@ def main():
     l3 = ax2.plot(omega_data['Date_Time'],
                   omega_data['T1'],
                   color='aqua',
-                  label='Seal Temp')
+                  label='Inboard Seal Temp')
 
     l4 = ax2.plot(omega_data['Date_Time'],
+                  omega_data['T4'],
+                  color='darkcyan',
+                  label='Outboard Seal Temp')
+
+
+    l5 = ax2.plot(omega_data['Date_Time'],
                   omega_data['T2'],
                   color='lightskyblue',
                   label='Inlet Temp')
 
-    l5 = ax2.plot(omega_data['Date_Time'],
+    l6 = ax2.plot(omega_data['Date_Time'],
                   omega_data['T3'],
                   color='dodgerblue',
                   label='Outlet Temp')
 
-    l6 = ax2.plot(omega_data['Date_Time'],
+    l7 = ax2.plot(omega_data['Date_Time'],
                   omega_data['T3']-omega_data['T2'],
                   color='black',
                   label='deltaTemp')
     
     SMA = 20 # simple moving average window
-    l7 = ax1.plot(torque_data["Date_Time"],
+    l8 = ax1.plot(torque_data["Date_Time"],
                   torque_data["Torque, Nm"].rolling(window=SMA).mean(),
                   color='lime',
                   label=f'SMA{SMA} - Torque')
 
+    ax2.set_ylim(150,250)
     # create legend for all traces
-    lns = l1+l7+l2+l3+l4+l5+l6
+    lns = l1+l8+l2+l3+l4+l5+l6+l8
     labs = [line.get_label() for line in lns]
     ax1.legend(lns, labs, loc="best")
 

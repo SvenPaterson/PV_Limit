@@ -87,7 +87,7 @@ def get_FLIR_data(raw_data_path, crop_data_path):
         df.rename(columns={'timestamp': 'Date_Time',
                         'temp': 'Temperature, degF'},
                         inplace=True)
-        df.sort_values(by=[df('timestamp')], inplace=True, ignore_index=True)
+        df.sort_values(by=['Date_Time'], inplace=True, ignore_index=True)
         df.to_pickle(os.path.join(raw_data_path, 'FLIR_data.pickle'))
 
         if len(fail_list) > 1:
