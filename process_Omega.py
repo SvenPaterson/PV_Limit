@@ -1,6 +1,5 @@
 import os
 import pandas as pd
-from tqdm import tqdm
 
 def correctCSV(file_path):
     with open(file_path, 'r') as f_in, open((file_path+'.csv'), 'w') as f_out:

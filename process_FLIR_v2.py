@@ -1,4 +1,3 @@
-from ast import Raise
 import os
 import pandas as pd
 import pickle
@@ -6,7 +5,7 @@ import numpy as np
 import cv2
 
 from tqdm import tqdm
-from PIL import Image, ImageOps
+from PIL import Image
 from pytesseract import pytesseract
 
 # point to local pytesseract installation
@@ -103,5 +102,6 @@ def get_FLIR_data(raw_data_path, crop_data_path):
                 f_out.write(success_msg)
         
         print("\n[Processing Complete]\n")
+    
     print(df)
     return df

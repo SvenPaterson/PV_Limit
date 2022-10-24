@@ -8,6 +8,7 @@ from process_FLIR_v2 import get_FLIR_data
 from process_futek import get_torque_data
 from process_Omega import get_Omega_data
 from tkinter import filedialog
+from datetime import datetime, timedelta
 
 from torque_PSD import SAMPLE_RATE
 
@@ -99,9 +100,17 @@ def main():
                   color='lime',
                   label=f'SMA{SMA} - Torque')
 
-    ax2.set_ylim(150,250)
+    ax2.set_ylim(0,400)
+    ax1.set_ylim(0,2)
+
+    test_start_time = torque_data["Date_Time"][0]
+    test_duration = timedelta(hours=48)
+    time_padding = timedelta(hours=2)
+    ax1.set_xlim(test_start_time-time_padding,
+                 test_start_time + test_duration + time_padding)
+
     # create legend for all traces
-    lns = l1+l8+l2+l3+l4+l5+l6+l8
+    lns = l1+l8+l2+l3+l4+l5+l6+l7
     labs = [line.get_label() for line in lns]
     ax1.legend(lns, labs, loc="best")
 

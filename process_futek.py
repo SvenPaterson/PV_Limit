@@ -1,4 +1,3 @@
-from email import header
 import os
 import csv
 import pandas as pd
@@ -56,7 +55,6 @@ def torque_file_to_df(file, sep):
     else: time_delta = timedelta(milliseconds=1000/sample_rate)
     total_time = [trigger_time+i*time_delta for i in range(0, df.shape[0])]
     df['Date_Time'] = pd.Series(total_time)
-    #print(df)
     return df
 
 
@@ -79,7 +77,14 @@ def get_torque_data(raw_data_path):
             next_df = torque_file_to_df(file, sep)
             df = pd.concat([df, next_df], ignore_index=True)
     df.sort_values(by=['Date_Time'], ignore_index=True, inplace=True)
+
     # display positive torque
     if df['Torque, Nm'].mean() < 0:
         df['Torque, Nm'] = df['Torque, Nm'].multiply(other=-1)
+
+    """ # offset torque data if transducer was not exactly tared to 0 for 48hr test
+    if (df.Date_Time.iloc[-1] - df.Date_Time.iloc[0]) > timedelta(hours=12):
+        start_torque = df['Torque, Nm'][df['Torque, Nm'] < 0.5].mean()
+        df['Torque, Nm'] = df['Torque, Nm'].subtract(start_torque) """
+
     return df
