@@ -73,10 +73,10 @@ def main():
                   color='aqua',
                   label='Inboard Seal Temp')
 
-    l4 = ax2.plot(omega_data['Date_Time'],
+    """ l4 = ax2.plot(omega_data['Date_Time'],
                   omega_data['T4'],
                   color='darkcyan',
-                  label='Outboard Seal Temp')
+                  label='Outboard Seal Temp') """
 
 
     l5 = ax2.plot(omega_data['Date_Time'],
@@ -100,17 +100,20 @@ def main():
                   color='lime',
                   label=f'SMA{SMA} - Torque')
 
-    ax2.set_ylim(0,400)
-    ax1.set_ylim(0,2)
+    ax2.set_ylim(-50,300)
+    ax1.set_ylim(-.25,1.5)
 
     test_start_time = torque_data["Date_Time"][0]
-    test_duration = timedelta(hours=48)
-    time_padding = timedelta(hours=2)
+
+    #change depending on which type of test you're running
+    test_duration = timedelta(hours=2)
+    time_padding = timedelta(minutes=10)
     ax1.set_xlim(test_start_time-time_padding,
                  test_start_time + test_duration + time_padding)
 
     # create legend for all traces
-    lns = l1+l8+l2+l3+l4+l5+l6+l7
+    #lns = l1+l8+l2+l3+l4+l5+l6+l7
+    lns = l1+l8+l2+l3+l5+l6+l7
     labs = [line.get_label() for line in lns]
     ax1.legend(lns, labs, loc="best")
 

@@ -1,5 +1,6 @@
 import os
 import csv
+from random import sample
 import pandas as pd
 
 from tqdm import tqdm
@@ -29,6 +30,7 @@ def torque_file_to_df(file, sep):
             row = next(reader)
             #print(row)
             x += 1
+
     if row_num > 23:
         header_row = 25
     else: 
@@ -49,11 +51,19 @@ def torque_file_to_df(file, sep):
     df.rename(columns={'Tracking Value': 'Torque, Nm'}, inplace=True)
     
     # ensure sample rate is added to date_time column
-    trigger_time = df.iloc[0]['Date_Time']
-    if header_row > 23:
+    
+    """ if header_row > 23:
         time_delta = df.iloc[1]['Date_Time'] - df.iloc[0]['Date_Time']
-    else: time_delta = timedelta(milliseconds=1000/sample_rate)
+    else: time_delta = timedelta(milliseconds=1000/sample_rate) """
+
+    if df.iloc[1]['Date_Time'] == df.iloc[0]['Date_Time']:
+        sample_rate = 200 #200S/s for PV lim typical
+    else:
+        sample_rate = 1 # 1S/2 for 48 test typical
+    time_delta = timedelta(milliseconds=1000/sample_rate)
+    trigger_time = df.iloc[0]['Date_Time']
     total_time = [trigger_time+i*time_delta for i in range(0, df.shape[0])]
+    print(total_time[-1])
     df['Date_Time'] = pd.Series(total_time)
     return df
 
