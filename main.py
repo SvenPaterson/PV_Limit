@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import tkinter as tk
 
 from process_FLIR_v2 import get_FLIR_data
-from process_futek import get_torque_data
+from process_futek_issue import get_torque_data
 from process_Omega import get_Omega_data
 from tkinter import filedialog
 from datetime import datetime, timedelta
