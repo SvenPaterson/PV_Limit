@@ -8,64 +8,61 @@ from datetime import timedelta
 
 
 def torque_file_to_df(file, sep):
-    # read sample rate of data file
+    ### Find header row and sample rate of data ###
     with open(file) as f:
         reader = csv.reader(f)
         row = next(reader)
-        row_num = 1
-        while row != ['Sampling Rate\t']:
-            row = next(reader)
-            row_num += 1
-        next(reader)
-        row_num += 1
-        row = next(reader)
-        row_num +=1
         
-        if sep == '\t':
-            sample_rate = int(row[0].split('"')[1])
-        
+        header_row = False
+        sample_rate = False
+        blank_rows = 0
 
-        x = 0
-        while x < 10:
+        i = 1 # pd.read_csv counts the 0th row as 1
+        while i < 30:
             row = next(reader)
-            #print(row)
-            x += 1
+            if not row:
+                blank_rows += 1
+            if row:
+                row = row[0].split('\t')
+                
+                if not header_row and row[0] == 'Sample Number':
+                    header_row = i
+                if row[0] == 'Sampling Rate':
+                    sample_rate = i+2
+                if sample_rate and i == sample_rate:
+                    sample_rate = int(row[1].split('"')[1])
+            i += 1
+        header_row -= blank_rows
 
-    if row_num > 23:
-        header_row = 25
-    else: 
-        header_row = 23
-    
-    if header_row > 23:
-        df = pd.read_csv(file, sep=sep, header=header_row,
-                         index_col='Sample Number')
-        df.drop(columns=df.columns[-2:], axis=1, inplace=True)
-        df.Date = pd.to_datetime(df.Date, infer_datetime_format=True)
-        df.rename(columns={'Date': 'Date_Time'}, inplace=True)
-    else:
-        df = pd.read_csv(file, sep=sep, header=header_row,
-                         index_col='Sample Number',
-                         parse_dates=[['Date', 'Time']])
-        df.drop(columns=df.columns[-1], axis=1, inplace=True)
-
+    df = pd.read_csv(file, sep=sep, header=header_row,
+                     index_col='Sample Number', 
+                     parse_dates=[['Date', 'Time']])
+    df.drop(columns=df.columns[-1:], axis=1, inplace=True)
     df.rename(columns={'Tracking Value': 'Torque, Nm'}, inplace=True)
     
-    # ensure sample rate is added to date_time column
-    
-    """ if header_row > 23:
-        time_delta = df.iloc[1]['Date_Time'] - df.iloc[0]['Date_Time']
-    else: time_delta = timedelta(milliseconds=1000/sample_rate) """
-
-    if df.iloc[1]['Date_Time'] == df.iloc[0]['Date_Time']:
-        sample_rate = 200 #200S/s for PV lim typical
+        
+    if  'C3_S5' in file:
+        """ 
+        # Super dirty hack for weird variable sample_rate thanks to USB bandwidth
+        # limitations when setting high sample rate on Sensit live logging view
+        """
+        df_avg = df.groupby('Date_Time', as_index=False)['Torque, Nm'].mean()
+        return df_avg
     else:
-        sample_rate = 1 # 1S/2 for 48 test typical
-    time_delta = timedelta(milliseconds=1000/sample_rate)
-    trigger_time = df.iloc[0]['Date_Time']
-    total_time = [trigger_time+i*time_delta for i in range(0, df.shape[0])]
-    print(total_time[-1])
-    df['Date_Time'] = pd.Series(total_time)
-    return df
+        if df.iloc[1]['Date_Time'] != df.iloc[0]['Date_Time']:
+            """ 
+            # if running in live view on Sensit software the sample_rate of
+            # sensor will not match the sample interval on the data file. So
+            # you will need to manually select the sample rate here
+            """
+            sample_rate = 1
+
+        time_delta = timedelta(milliseconds=1000/sample_rate)
+        trigger_time = df.iloc[0]['Date_Time']
+        total_time = [trigger_time+i*time_delta for i in range(0, df.shape[0])]
+        df['Date_Time'] = pd.Series(total_time)
+        return df
+    
 
 
 def get_torque_data(raw_data_path):
@@ -91,10 +88,5 @@ def get_torque_data(raw_data_path):
     # display positive torque
     if df['Torque, Nm'].mean() < 0:
         df['Torque, Nm'] = df['Torque, Nm'].multiply(other=-1)
-
-    """ # offset torque data if transducer was not exactly tared to 0 for 48hr test
-    if (df.Date_Time.iloc[-1] - df.Date_Time.iloc[0]) > timedelta(hours=12):
-        start_torque = df['Torque, Nm'][df['Torque, Nm'] < 0.5].mean()
-        df['Torque, Nm'] = df['Torque, Nm'].subtract(start_torque) """
 
     return df

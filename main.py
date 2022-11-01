@@ -4,14 +4,11 @@ import matplotlib
 import matplotlib.pyplot as plt
 import tkinter as tk
 
-from process_FLIR_v2 import get_FLIR_data
-from process_futek_issue import get_torque_data
+from process_FLIR import get_FLIR_data
+from process_futek import get_torque_data
 from process_Omega import get_Omega_data
 from tkinter import filedialog
-from datetime import datetime, timedelta
-
-from torque_PSD import SAMPLE_RATE
-
+from datetime import timedelta
 
 def main():
     #  --------------- SETUP PROJECT ---------------  #
@@ -20,12 +17,18 @@ def main():
     root_dir = os.path.join(sys.path[0], 'raw_data')
     data_path = filedialog.askdirectory(title="Select Project Folder",
                                         initialdir=root_dir)
-    cropped_data_path = os.path.join(data_path, 'cropped_data')
-    if not os.path.exists(cropped_data_path):
-        os.makedirs(cropped_data_path)
-    print("\nImporting of Data has begun, please wait...\n")
+    if '48hr' in data_path:
+        # duration in hrs, padding in mins
+        TEST_DURATION = 48
+        PADDING = 30
+        
+    else: 
+        TEST_DURATION = 2
+        PADDING = 10
+
     
     #  ---------------- IMPORT DATA ----------------  #
+    print("\nImporting of Data has begun, please wait...\n")
     try:
         print('\tImporting Thermocouple data...')
         omega_data = get_Omega_data(data_path)
@@ -35,7 +38,7 @@ def main():
     
     try:
         print('\tImporting FLIR Camera data...')
-        flir_data = get_FLIR_data(data_path, cropped_data_path)
+        flir_data = get_FLIR_data(data_path)
         print('\t  FLIR Camera image processing/import successful\n')
     except:
         raise ValueError('\n\tFLIR Camera image processing/import unsuccessful\n')
@@ -73,11 +76,11 @@ def main():
                   color='aqua',
                   label='Inboard Seal Temp')
 
-    """ l4 = ax2.plot(omega_data['Date_Time'],
-                  omega_data['T4'],
-                  color='darkcyan',
-                  label='Outboard Seal Temp') """
-
+    if TEST_DURATION == 48:
+        l4 = ax2.plot(omega_data['Date_Time'],
+                      omega_data['T4'],
+                      color='darkcyan',
+                      label='Outboard Seal Temp')
 
     l5 = ax2.plot(omega_data['Date_Time'],
                   omega_data['T2'],
@@ -106,14 +109,16 @@ def main():
     test_start_time = torque_data["Date_Time"][0]
 
     #change depending on which type of test you're running
-    test_duration = timedelta(hours=2)
-    time_padding = timedelta(minutes=10)
+    test_duration = timedelta(hours=TEST_DURATION)
+    time_padding = timedelta(minutes=PADDING)
     ax1.set_xlim(test_start_time-time_padding,
                  test_start_time + test_duration + time_padding)
 
     # create legend for all traces
-    #lns = l1+l8+l2+l3+l4+l5+l6+l7
-    lns = l1+l8+l2+l3+l5+l6+l7
+    if TEST_DURATION == 48:
+        lns = l1+l8+l2+l3+l4+l5+l6+l7
+    else:
+        lns = l1+l8+l2+l3+l5+l6+l7
     labs = [line.get_label() for line in lns]
     ax1.legend(lns, labs, loc="best")
 

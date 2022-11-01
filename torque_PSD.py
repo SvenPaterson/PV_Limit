@@ -7,9 +7,10 @@ from matplotlib.animation import FuncAnimation
 from matplotlib.ticker import (MultipleLocator, AutoMinorLocator)
 from process_futek import get_torque_data
 
-SAMPLE_RATE = 100
-STEP_LENGTH = 3600 # in seconds
+SAMPLE_RATE = 300
+STEP_LENGTH = 7200 # in seconds
 
+filedialog.askop
 
 def main():
     #  --------------- SETUP PROJECT ---------------  #
@@ -19,9 +20,9 @@ def main():
     data_path = filedialog.askdirectory(title="Select Project Folder",
                                         initialdir=root_dir)
     df = get_torque_data(data_path)
-    print(df.head())
+    #print(df.head())
 
-    animate_bool = True 
+    animate_bool = False 
     if animate_bool:
         window = 60
         sliced_data = slice_data(df, window, SAMPLE_RATE)
@@ -40,13 +41,13 @@ def main():
             plt.tight_layout()
             return ax
 
-        ani = FuncAnimation(fig, animate, frames=frames, interval=25, repeat=True)
-
+        ani = FuncAnimation(fig, animate, frames=frames, interval=100, repeat=True)
+        #interval, delay between frames in milliseconds
     else:
         fig, ax = plt.subplots()
         
         sliced_data = slice_data(df, STEP_LENGTH, SAMPLE_RATE)
-        print(sliced_data)
+        #print(sliced_data)
         for i in range(0, len(sliced_data)):
             ax.psd(sliced_data[f'test_step_{i}']["Torque, Nm"],
                 Fs=SAMPLE_RATE,
@@ -55,9 +56,6 @@ def main():
     
     
     plt.show()
-
-
-    
 
 
 def slice_data(df, interval_in_secs, sample_rate):
@@ -72,7 +70,7 @@ def slice_data(df, interval_in_secs, sample_rate):
         start = i
         stop = i + chunk
         hour = i / chunk
-        print(start, stop, hour)
+        #print(start, stop, hour)
         test_step = df.iloc[start:stop]
         sliced_data[f"test_step_{int(hour)}"] = test_step
     return sliced_data
