@@ -10,7 +10,24 @@ from process_futek import get_torque_data
 SAMPLE_RATE = 300
 STEP_LENGTH = 7200 # in seconds
 
-filedialog.askop
+
+def slice_data(df, interval_in_secs, sample_rate):
+    sliced_data = {}
+    print(f"Total Samples: {df.index[-1]}")
+    chunk_test = df.index[-1] // interval_in_secs
+    print(f'chunk test is: {chunk_test}')
+    chunk = interval_in_secs * sample_rate
+    print(f'chunk is {chunk}')
+
+    for i in range(0, df.index[-1]-chunk, chunk):
+        start = i
+        stop = i + chunk
+        hour = i / chunk
+        #print(start, stop, hour)
+        test_step = df.iloc[start:stop]
+        sliced_data[f"test_step_{int(hour)}"] = test_step
+    return sliced_data
+
 
 def main():
     #  --------------- SETUP PROJECT ---------------  #
@@ -52,28 +69,13 @@ def main():
             ax.psd(sliced_data[f'test_step_{i}']["Torque, Nm"],
                 Fs=SAMPLE_RATE,
                 label= f"Test Step #{i}")
-
+        ax.set_ylim(bottom=-80, top=10)
     
     
     plt.show()
 
 
-def slice_data(df, interval_in_secs, sample_rate):
-    sliced_data = {}
-    print(f"Total Samples: {df.index[-1]}")
-    chunk_test = df.index[-1] // interval_in_secs
-    print(f'chunk test is: {chunk_test}')
-    chunk = interval_in_secs * sample_rate
-    print(f'chunk is {chunk}')
 
-    for i in range(0, df.index[-1]-chunk, chunk):
-        start = i
-        stop = i + chunk
-        hour = i / chunk
-        #print(start, stop, hour)
-        test_step = df.iloc[start:stop]
-        sliced_data[f"test_step_{int(hour)}"] = test_step
-    return sliced_data
 
 
 
