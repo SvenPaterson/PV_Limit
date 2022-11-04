@@ -17,6 +17,8 @@ def main():
     root_dir = os.path.join(sys.path[0], 'raw_data')
     data_path = filedialog.askdirectory(title="Select Project Folder",
                                         initialdir=root_dir)
+    print(f'Processing data from: {data_path}')
+    
     if '48hr' in data_path:
         # duration in hrs, padding in mins
         TEST_DURATION = 48
@@ -53,7 +55,7 @@ def main():
 
     #  ------------------ PLOT DATA ------------------  #
     # fig, [ax1, ax2] = plt.subplots(nrows=2, ncols=1)
-    fig, ax1 = plt.subplots()
+    _, ax1 = plt.subplots()
     l1 = ax1.plot(torque_data["Date_Time"],
                   torque_data["Torque, Nm"],
                   color='green',

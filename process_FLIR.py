@@ -19,7 +19,7 @@ def listToString(s):
 
 def get_FLIR_data(raw_data_path):
     file_list = [f for f in os.listdir(raw_data_path) if f.endswith('.jpg')]
-    prev_data_file = [f for f in os.listdir(raw_data_path) if f.endswith('.pickle')]
+    prev_data_file = [f for f in os.listdir(raw_data_path) if f == 'FLIR_data.pickle']
 
     if len(prev_data_file) == 0 and len(file_list) == 0:
         error_msg = "\n\tThere is no previously processed data nor\n" \

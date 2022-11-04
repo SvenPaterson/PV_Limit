@@ -1,5 +1,6 @@
 import os
 import csv
+import pickle
 from random import sample
 import pandas as pd
 
@@ -68,25 +69,38 @@ def torque_file_to_df(file, sep):
 def get_torque_data(raw_data_path):
     all_files = os.listdir(raw_data_path)
     file_list = [f for f in all_files if f.endswith(('.txt'))]
-    if not len(file_list):
-        raise ValueError('\n\tThere is no torque data file available to process')
-    for file_path in tqdm(file_list):
-        file = os.path.join(raw_data_path, file_path)
-        if file_path.endswith(".txt"):
-            sep = '\t'
-        if file_path.endswith(".csv"):
-            sep = ','
-        if not file_path.endswith(".csv") and not file_path.endswith('.txt'): 
-            raise ValueError('\n\tIncorrect file type!')
-        if 'df' not in locals():
-            df = torque_file_to_df(file, sep)
-        else:
-            next_df = torque_file_to_df(file, sep)
-            df = pd.concat([df, next_df], ignore_index=True)
-    df.sort_values(by=['Date_Time'], ignore_index=True, inplace=True)
 
-    # display positive torque
-    if df['Torque, Nm'].mean() < 0:
-        df['Torque, Nm'] = df['Torque, Nm'].multiply(other=-1)
+    prev_data_file = [f for f in os.listdir(raw_data_path) if f == 'FUTEK_data.pickle']
 
+    if len(prev_data_file) == 0 and len(file_list) == 0:
+        error_msg = "\n\tThere is no previously processed data nor\n" \
+                    "\tare there any raw Futek files available to process"
+        raise ValueError(error_msg)
+    
+
+    if len(prev_data_file) > 0:
+        prev_data_path = os.path.join(raw_data_path, prev_data_file[0])
+        df = pickle.load(open(prev_data_path, 'rb'))
+    else:
+    
+        for file_path in tqdm(file_list):
+            file = os.path.join(raw_data_path, file_path)
+            if file_path.endswith(".txt"):
+                sep = '\t'
+            if file_path.endswith(".csv"):
+                sep = ','
+            if not file_path.endswith(".csv") and not file_path.endswith('.txt'): 
+                raise ValueError('\n\tIncorrect file type!')
+            if 'df' not in locals():
+                df = torque_file_to_df(file, sep)
+            else:
+                next_df = torque_file_to_df(file, sep)
+                df = pd.concat([df, next_df], ignore_index=True)
+        df.sort_values(by=['Date_Time'], ignore_index=True, inplace=True)
+
+        # display positive torque
+        if df['Torque, Nm'].mean() < 0:
+            df['Torque, Nm'] = df['Torque, Nm'].multiply(other=-1)
+
+        df.to_pickle(os.path.join(raw_data_path, 'FUTEK_data.pickle'))
     return df
