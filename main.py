@@ -23,11 +23,16 @@ def main():
         # duration in hrs, padding in mins
         TEST_DURATION = 48
         PADDING = 30
+
+    elif '240hr' in data_path:
+        TEST_DURATION = 240
+        PADDING = 120
         
     else: 
         TEST_DURATION = 2
         PADDING = 10
 
+    OPACITY = 0.75 # transparency of plotted data
     
     #  ---------------- IMPORT DATA ----------------  #
     print("\nImporting of Data has begun, please wait...\n")
@@ -54,77 +59,120 @@ def main():
 
 
     #  ------------------ PLOT DATA ------------------  #
-    # fig, [ax1, ax2] = plt.subplots(nrows=2, ncols=1)
-    _, ax1 = plt.subplots()
-    l1 = ax1.plot(torque_data["Date_Time"],
+    # fig, [axs[0], axs[1]] = plt.subplots(nrows=2, ncols=1)
+    
+    fig, axs = plt.subplots(3, 1)
+    fig.suptitle(os.path.split(data_path)[1])
+    axs[0].set_ylabel('Torque, Nm')
+    axs[1].set_ylabel('Temperature, degF')
+    axs[2].set_ylabel('Temperature, degF')
+
+    # axs[0].set_ylim(-0.25, 1.5)
+    # axs[1].set_ylim(110, 210)
+    axs[2].set_ylim(-20, 20)
+
+
+    l1 = axs[0].plot(torque_data["Date_Time"],
                   torque_data["Torque, Nm"],
                   color='green',
                   label='Torque')
 
-    ax1.set_xlabel('Timestamp')
-    ax1.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%H:%M'))
-    ax1.set_ylabel('Torque, Nm', color='g')
-    ax2 = ax1.twinx()
-    ax2.set_ylabel('Temperature, degF')
-    #ax2.set_ylim(0, 400)
+    SMA = 1000 # simple moving average window
+    l2 = axs[0].plot(torque_data["Date_Time"],
+                     torque_data["Torque, Nm"].rolling(window=SMA).mean(),
+                     color='lime',
+                     label=f'SMA{SMA}')
 
-    l2 = ax2.plot(flir_data["Date_Time"],
-                  flir_data["Temperature, degF"],
-                  color='r',
-                  label='Thermal Img')
+    l3 = axs[1].plot(flir_data["Date_Time"],
+                     flir_data["Temperature, degF"],
+                     color='r',
+                     label='Thermal Img')
 
-    l3 = ax2.plot(omega_data['Date_Time'],
-                  omega_data['T1'],
-                  color='aqua',
-                  label='Inboard Seal Temp')
+    l4 = axs[1].plot(omega_data['Date_Time'],
+                     omega_data['T1'],
+                     color='aqua',
+                     label='Inboard Seal Temp')
 
-    if TEST_DURATION == 48:
-        l4 = ax2.plot(omega_data['Date_Time'],
-                      omega_data['T4'],
-                      color='darkcyan',
-                      label='Outboard Seal Temp')
+    if TEST_DURATION >= 48:
+        l5 = axs[1].plot(omega_data['Date_Time'],
+                         omega_data['T4'],
+                         color='darkcyan',
+                         label='Outboard Seal Temp')
 
-    l5 = ax2.plot(omega_data['Date_Time'],
-                  omega_data['T2'],
-                  color='lightskyblue',
-                  label='Inlet Temp')
+    l6 = axs[1].plot(omega_data['Date_Time'],
+                     omega_data['T2'],
+                     color='yellow',
+                     label='Inlet Temp')
 
-    l6 = ax2.plot(omega_data['Date_Time'],
-                  omega_data['T3'],
-                  color='dodgerblue',
-                  label='Outlet Temp')
+    l7 = axs[1].plot(omega_data['Date_Time'],
+                     omega_data['T3'],
+                     color='orange',
+                     label='Outlet Temp')
 
-    l7 = ax2.plot(omega_data['Date_Time'],
-                  omega_data['T3']-omega_data['T2'],
-                  color='black',
-                  label='deltaTemp')
+    l8 = axs[2].plot(omega_data['Date_Time'],
+                     omega_data['T3']-omega_data['T2'],
+                     color='white',
+                     label='deltaT: Outlet-Inlet')
     
-    SMA = 20 # simple moving average window
-    l8 = ax1.plot(torque_data["Date_Time"],
-                  torque_data["Torque, Nm"].rolling(window=SMA).mean(),
-                  color='lime',
-                  label=f'SMA{SMA} - Torque')
-
-    ax2.set_ylim(-50,300)
-    ax1.set_ylim(-.25,1.5)
+    for ax in axs:
+        for line in ax.lines:
+            line.set_alpha(OPACITY)
 
     test_start_time = torque_data["Date_Time"][0]
 
     #change depending on which type of test you're running
+    if TEST_DURATION == 48:
+        maj_formatter = matplotlib.dates.AutoDateFormatter(24)
+        min_locator = matplotlib.ticker.AutoMinorLocator()
+        x_label = 'Time (Hr:Min)\nDate (MM/DD)'
+    if TEST_DURATION > 48:
+        maj_formatter = matplotlib.dates.DateFormatter('%m/%d')
+        min_locator = matplotlib.ticker.AutoMinorLocator(12)
+        x_label = 'Date (MM/DD)'
+    else:
+        maj_formatter = matplotlib.dates.DateFormatter('%H:%M')
+        min_locator = matplotlib.ticker.AutoMinorLocator(2)
+        x_label = 'Time (Hr:Min)'
+
     test_duration = timedelta(hours=TEST_DURATION)
     time_padding = timedelta(minutes=PADDING)
-    ax1.set_xlim(test_start_time-time_padding,
-                 test_start_time + test_duration + time_padding)
+    axs[2].set_xlabel(x_label)
+    
+    for ax in axs:
+        ax.minorticks_on()
+        ax.xaxis.set_major_formatter(maj_formatter)
+        ax.xaxis.set_minor_locator(min_locator)
+        ax.set_xlim(test_start_time - time_padding,
+                    test_start_time + test_duration + time_padding)
+        ax.grid(color='white', linestyle='-', 
+                linewidth=0.25, alpha=1.00,
+                which='Major')
+        ax.grid(color='whitesmoke', linestyle='--',
+                linewidth=0.25, alpha=0.75,
+                which='Minor')
+        ax.set_facecolor('dimgrey')
 
     # create legend for all traces
-    if TEST_DURATION == 48:
-        lns = l1+l8+l2+l3+l4+l5+l6+l7
+    lns1 = l1+l2
+    labs1 = [line.get_label() for line in lns1]
+    if TEST_DURATION >= 48:
+        lns2 = l3+l4+l5+l6+l7
     else:
-        lns = l1+l8+l2+l3+l5+l6+l7
-    labs = [line.get_label() for line in lns]
-    ax1.legend(lns, labs, loc="best")
+        lns2 = l3+l4+l6+l7
+    labs2 = [line.get_label() for line in lns2]
+    lns3 = l8
+    labs3 = [line.get_label() for line in lns3]
+    lns = [lns1, lns2, lns3]
+    labs = [labs1, labs2, labs3]
+    for i, ax in enumerate(axs):
+        ax.legend(lns[i], labs[i], loc="best", ncol=len(labs2), fontsize=8)
 
-    plt.tight_layout()
+    plt.subplots_adjust(top=0.950,
+                        bottom=0.08,
+                        left=0.05,
+                        right=0.99,
+                        hspace=0.225,
+                        wspace=0.2)
     plt.show()
 
 
