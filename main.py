@@ -165,7 +165,8 @@ def main():
     lns = [lns1, lns2, lns3]
     labs = [labs1, labs2, labs3]
     for i, ax in enumerate(axs):
-        ax.legend(lns[i], labs[i], loc="best", ncol=len(labs2), fontsize=8)
+        ax.legend(lns[i], labs[i], loc="lower right",
+                  ncol=len(labs2), fontsize=8)
 
     plt.subplots_adjust(top=0.950,
                         bottom=0.08,

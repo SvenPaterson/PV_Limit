@@ -40,29 +40,27 @@ def torque_file_to_df(file, sep):
                      parse_dates=[['Date', 'Time']])
     df.drop(columns=df.columns[-1:], axis=1, inplace=True)
     df.rename(columns={'Tracking Value': 'Torque, Nm'}, inplace=True)
-    
-        
+
+    file_name = os.path.split(file)[1]
+    file_type = file_name[:4]
+
     if  'C3_S5' in file:
         """ 
         # Super dirty hack for weird variable sample_rate thanks to USB bandwidth
         # limitations when setting high sample rate on Sensit live logging view
         """
-        df_avg = df.groupby('Date_Time', as_index=False)['Torque, Nm'].mean()
-        return df_avg
-    else:
-        if df.iloc[1]['Date_Time'] != df.iloc[0]['Date_Time']:
-            """ 
-            # if running in live view on Sensit software the sample_rate of
-            # sensor will not match the sample interval on the data file. So
-            # you will need to manually select the sample rate here
-            """
-            sample_rate = 1
+        df = df.groupby('Date_Time', as_index=False)['Torque, Nm'].mean()
 
+    if file_type== "Data":
         time_delta = timedelta(milliseconds=1000/sample_rate)
         trigger_time = df.iloc[0]['Date_Time']
         total_time = [trigger_time+i*time_delta for i in range(0, df.shape[0])]
         df['Date_Time'] = pd.Series(total_time)
-        return df
+
+    if file_type== "Live":
+        pass
+
+    return df
     
 
 
