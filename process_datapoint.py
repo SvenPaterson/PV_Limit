@@ -11,7 +11,7 @@ from tkinter import filedialog
 from datetime import timedelta
 
 
-def process_data(data_path):
+def process_data(data_path, plot=False):
     print(f'Processing data from: {data_path}')
     
     if '48hr' in data_path:
@@ -56,14 +56,14 @@ def process_data(data_path):
     #  ------------------ PLOT DATA ------------------  #
     # fig, [axs[0], axs[1]] = plt.subplots(nrows=2, ncols=1)
     
-    fig, axs = plt.subplots(3, 1)
+    fig, axs = plt.subplots(3, 1, figsize=(11, 8.5))
     fig.suptitle(os.path.split(data_path)[1])
     axs[0].set_ylabel('Torque, Nm')
     axs[1].set_ylabel('Temperature, degF')
     axs[2].set_ylabel('Temperature, degF')
 
-    # axs[0].set_ylim(-0.25, 1.5)
-    # axs[1].set_ylim(110, 210)
+    axs[0].set_ylim(0, 1.5)
+    axs[1].set_ylim(120, 250)
     axs[2].set_ylim(-20, 20)
 
 
@@ -106,7 +106,7 @@ def process_data(data_path):
 
     l8 = axs[2].plot(omega_data['Date_Time'],
                      omega_data['T3']-omega_data['T2'],
-                     color='white',
+                     color='black',
                      label='deltaT: Outlet-Inlet')
     
     for ax in axs:
@@ -139,13 +139,13 @@ def process_data(data_path):
         ax.xaxis.set_minor_locator(min_locator)
         ax.set_xlim(test_start_time - time_padding,
                     test_start_time + test_duration + time_padding)
-        ax.grid(color='white', linestyle='-', 
+        ax.grid(color='darkgrey', linestyle='-', 
                 linewidth=0.25, alpha=1.00,
                 which='Major')
-        ax.grid(color='whitesmoke', linestyle='--',
+        ax.grid(color='silver', linestyle='--',
                 linewidth=0.25, alpha=0.75,
                 which='Minor')
-        ax.set_facecolor('dimgrey')
+        ax.set_facecolor('white')
 
     # create legend for all traces
     lns1 = l1+l2
@@ -160,7 +160,7 @@ def process_data(data_path):
     lns = [lns1, lns2, lns3]
     labs = [labs1, labs2, labs3]
     for i, ax in enumerate(axs):
-        ax.legend(lns[i], labs[i], loc="lower right",
+        ax.legend(lns[i], labs[i], loc="upper right",
                   ncol=len(labs2), fontsize=8)
 
     plt.subplots_adjust(top=0.950,
@@ -170,16 +170,17 @@ def process_data(data_path):
                         hspace=0.225,
                         wspace=0.2)
 
+
     
 def main():
     #  --------------- SETUP PROJECT ---------------  #
     root = tk.Tk()
     root.withdraw()
-    root_dir = os.path.join(sys.path[0], 'raw_data')
+    root_dir = os.path.join(sys.path[0])
     data_path = filedialog.askdirectory(title="Select Project Folder",
                                         initialdir=root_dir)
     
-    process_data(data_path)
+    process_data(data_path, Plot=True)
     plt.show()
 
 if __name__ == '__main__':

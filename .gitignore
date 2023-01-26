@@ -1,3 +1,9 @@
 *.pyc
 *.spyproject
 test_img.jpg
+old_runs/
+processed_plots/
+raw_data/
+comparison_plots/
+batch_process/
+fail_list.csv
