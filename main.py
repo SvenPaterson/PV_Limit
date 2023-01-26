@@ -10,13 +10,8 @@ from process_Omega import get_Omega_data
 from tkinter import filedialog
 from datetime import timedelta
 
-def main():
-    #  --------------- SETUP PROJECT ---------------  #
-    root = tk.Tk()
-    root.withdraw()
-    root_dir = os.path.join(sys.path[0], 'raw_data')
-    data_path = filedialog.askdirectory(title="Select Project Folder",
-                                        initialdir=root_dir)
+
+def process_data(data_path):
     print(f'Processing data from: {data_path}')
     
     if '48hr' in data_path:
@@ -174,8 +169,18 @@ def main():
                         right=0.99,
                         hspace=0.225,
                         wspace=0.2)
-    plt.show()
 
+    
+def main():
+    #  --------------- SETUP PROJECT ---------------  #
+    root = tk.Tk()
+    root.withdraw()
+    root_dir = os.path.join(sys.path[0], 'raw_data')
+    data_path = filedialog.askdirectory(title="Select Project Folder",
+                                        initialdir=root_dir)
+    
+    process_data(data_path)
+    plt.show()
 
 if __name__ == '__main__':
     main()
