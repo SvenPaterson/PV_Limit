@@ -32,7 +32,7 @@ def get_subdirs(path):
                 print('Invalid response. Please try again.')
 
 #process each folder
-raw_data = os.path.join(sys.path[0], 'batch_process')
+raw_data = os.path.join(sys.path[0], 'raw_data', 'batch_process')
 for folder in get_subdirs(raw_data):
     process_data(folder)
     plot_name = os.path.split(folder)[-1]

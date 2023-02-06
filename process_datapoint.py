@@ -180,7 +180,7 @@ def main():
     data_path = filedialog.askdirectory(title="Select Project Folder",
                                         initialdir=root_dir)
     
-    process_data(data_path, Plot=True)
+    process_data(data_path, plot=True)
     plt.show()
 
 if __name__ == '__main__':
