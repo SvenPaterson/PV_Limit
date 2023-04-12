@@ -96,5 +96,5 @@ def get_FLIR_data(raw_data_path):
                 f_out.write(success_msg)
         
         print("\n[Processing Complete]\n")
-    
+
     return df

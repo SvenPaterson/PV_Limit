@@ -37,4 +37,5 @@ def get_Omega_data(raw_data_path):
         else:
             next_df = XLStoDataframe(raw_data_path, file)
             df = pd.concat([df, next_df], ignore_index=True)
+
     return df

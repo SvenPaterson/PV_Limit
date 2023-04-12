@@ -10,6 +10,10 @@ from process_Omega import get_Omega_data
 from tkinter import filedialog
 from datetime import timedelta
 
+def f(x):
+    # convert from F to C
+    x = (x - 32) / 1.8
+    return float(x)
 
 def process_data(data_path, plot=False):
     print(f'Processing data from: {data_path}')
@@ -59,11 +63,11 @@ def process_data(data_path, plot=False):
     fig, axs = plt.subplots(3, 1, figsize=(11, 8.5))
     fig.suptitle(os.path.split(data_path)[1])
     axs[0].set_ylabel('Torque, Nm')
-    axs[1].set_ylabel('Temperature, degF')
-    axs[2].set_ylabel('Temperature, degF')
+    axs[1].set_ylabel('Temperature, degC')
+    axs[2].set_ylabel('Temperature, degC')
 
     axs[0].set_ylim(0, 1.5)
-    axs[1].set_ylim(120, 250)
+    axs[1].set_ylim(30, 150)
     axs[2].set_ylim(-20, 20)
 
 
@@ -79,33 +83,33 @@ def process_data(data_path, plot=False):
                      label=f'SMA{SMA}')
 
     l3 = axs[1].plot(flir_data["Date_Time"],
-                     flir_data["Temperature, degF"],
+                     flir_data["Temperature, degF"].apply(f),
                      color='r',
                      label='Thermal Img')
 
     l4 = axs[1].plot(omega_data['Date_Time'],
-                     omega_data['T1'],
+                     omega_data['T1'].apply(f),
                      color='aqua',
                      label='Inboard Seal Temp')
 
     if TEST_DURATION >= 48:
         l5 = axs[1].plot(omega_data['Date_Time'],
-                         omega_data['T4'],
+                         omega_data['T4'].apply(f),
                          color='darkcyan',
                          label='Outboard Seal Temp')
 
     l6 = axs[1].plot(omega_data['Date_Time'],
-                     omega_data['T2'],
+                     omega_data['T2'].apply(f),
                      color='yellow',
                      label='Inlet Temp')
 
     l7 = axs[1].plot(omega_data['Date_Time'],
-                     omega_data['T3'],
+                     omega_data['T3'].apply(f),
                      color='orange',
                      label='Outlet Temp')
 
     l8 = axs[2].plot(omega_data['Date_Time'],
-                     omega_data['T3']-omega_data['T2'],
+                     omega_data['T3'].apply(f)-omega_data['T2'].apply(f),
                      color='black',
                      label='deltaT: Outlet-Inlet')
     
