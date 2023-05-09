@@ -3,6 +3,7 @@ import pandas as pd
 import pickle
 import numpy as np
 import cv2
+import concurrent.futures
 
 from tqdm import tqdm
 from PIL import Image
@@ -11,11 +12,41 @@ from pytesseract import pytesseract
 # point to local pytesseract installation
 pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
-# DO THIS https://www.analyticsvidhya.com/blog/2021/06/optical-character-recognitionocr-with-tesseract-opencv-and-python/
-
 def listToString(s):
     str1 = ""
     return str1.join(s)
+
+def process_image(file, raw_data_path):
+    img = Image.open(os.path.join(raw_data_path, file))
+
+    # get exif date_time string from jpeg file, produced by FLIR camera
+    img_exif = img.getexif()
+    for key, val in img_exif.items():
+        if key == 306:  # exif {key: '306', val: 'datetime'}
+            date_time = val
+
+    # crop, resize, resample, convert to greyscale, invert image
+    img = cv2.imread(os.path.join(raw_data_path, file))
+    img = img[5:24, 30:90]
+    cv2.dilate(img, (5, 5), img)
+    _,img = cv2.threshold(np.array(img), 125, 255, cv2.THRESH_BINARY)
+    img = cv2.bitwise_not(img)
+    img = cv2.copyMakeBorder(img, 10, 10, 10, 10, cv2.BORDER_CONSTANT, 
+                             value= (255,255,255))
+    img = cv2.inRange(img, (0,0,0), (10, 10, 10))
+    img = cv2.bitwise_not(img)
+
+    # perform OCR on cropped image
+    string = pytesseract.image_to_string(img, config='--psm 7')
+
+    # TODO refine below filter
+    num = [c for c in string if c.isdigit() or c == '.' or not 'F']
+
+    try:
+        t = float(listToString(num[:3]))
+        return (date_time, t, file)
+    except:
+        return (file, date_time, string, num)
 
 def get_FLIR_data(raw_data_path):
     file_list = [f for f in os.listdir(raw_data_path) if f.endswith('.jpg')]
@@ -35,44 +66,17 @@ def get_FLIR_data(raw_data_path):
         results = {'timestamp': [], 'temp': [], 'filename': []}
         fail_list = [("file, datetime, full string, float conversion attempt")]
 
-        for file in tqdm(file_list):
-            img = Image.open(os.path.join(raw_data_path, file))
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            processed_imgs = list(tqdm(executor.map(process_image, file_list, [raw_data_path] * len(file_list)), total=len(file_list)))
 
-            # get exif date_time string from jpeg file, produced by FLIR camera
-            img_exif = img.getexif()
-            for key, val in img_exif.items():
-                if key == 306:  # exif {key: '306', val: 'datetime'}
-                    date_time = val
-
-            # crop, resize, resample, convert to greyscale, invert image
-            img = cv2.imread(os.path.join(raw_data_path, file))
-            img = img[5:24, 30:90]
-            cv2.dilate(img, (5, 5), img)
-            _,img = cv2.threshold(np.array(img), 125, 255, cv2.THRESH_BINARY)
-            img = cv2.bitwise_not(img)
-            img = cv2.copyMakeBorder(img, 10, 10, 10, 10, cv2.BORDER_CONSTANT, 
-                                     value= (255,255,255))
-            img = cv2.inRange(img, (0,0,0), (10, 10, 10))
-            img = cv2.bitwise_not(img)
-
-            """ # save cropped greyscale image
-            file_name = f'{file.split(".")[0]}_cropped.jpg'
-            crop_path = os.path.join(crop_data_path, file_name)
-            cv2.imwrite(crop_path, img) """
-
-            # perform OCR on cropped image
-            string = pytesseract.image_to_string(img, config='--psm 7')
-
-            # TODO refine below filter
-            num = [c for c in string if c.isdigit() or c == '.' or not 'F']
-
-            try:
-                t = float(listToString(num[:3]))
+        for data in processed_imgs:
+            if len(data) == 3:
+                date_time, t, file = data
                 results['temp'].append(t)
                 results['timestamp'].append(date_time)
                 results['filename'].append(file)
-            except:
-                fail_list.append((f'{file}, {date_time}, {string}, {num}'))
+            else:
+                fail_list.append((f'{data[0]}, {data[1]}, {data[2]}, {data[3]}'))
         
         df = pd.DataFrame(results)
         df.timestamp = pd.to_datetime(df.timestamp,
@@ -98,3 +102,4 @@ def get_FLIR_data(raw_data_path):
         print("\n[Processing Complete]\n")
 
     return df
+

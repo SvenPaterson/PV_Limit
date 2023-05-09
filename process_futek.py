@@ -1,14 +1,15 @@
 import os
 import csv
 import pickle
-from random import sample
+import concurrent.futures
+
 import pandas as pd
 
 from tqdm import tqdm
 from datetime import timedelta
 
-
-def torque_file_to_df(file, sep):
+def torque_file_to_df(file_and_sep):
+    file, sep = file_and_sep
     ### Find header row and sample rate of data ###
     with open(file) as f:
         reader = csv.reader(f)
@@ -62,6 +63,15 @@ def torque_file_to_df(file, sep):
 
     return df
     
+def get_file_and_separator(raw_data_path, file_path):
+    file = os.path.join(raw_data_path, file_path)
+    if file_path.endswith(".txt"):
+        sep = '\t'
+    elif file_path.endswith(".csv"):
+        sep = ','
+    else:
+        raise ValueError('\n\tIncorrect file type!')
+    return (file, sep)
 
 
 def get_torque_data(raw_data_path):
@@ -74,26 +84,28 @@ def get_torque_data(raw_data_path):
         error_msg = "\n\tThere is no previously processed data nor\n" \
                     "\tare there any raw Futek files available to process"
         raise ValueError(error_msg)
-    
 
     if len(prev_data_file) > 0:
         prev_data_path = os.path.join(raw_data_path, prev_data_file[0])
         df = pickle.load(open(prev_data_path, 'rb'))
     else:
-    
-        for file_path in tqdm(file_list):
-            file = os.path.join(raw_data_path, file_path)
-            if file_path.endswith(".txt"):
+        file_paths = []
+        for file_name in file_list:
+            file = os.path.join(raw_data_path, file_name)
+            if file_name.endswith(".txt"):
                 sep = '\t'
-            if file_path.endswith(".csv"):
+            elif file_name.endswith(".csv"):
                 sep = ','
-            if not file_path.endswith(".csv") and not file_path.endswith('.txt'): 
-                raise ValueError('\n\tIncorrect file type!')
-            if 'df' not in locals():
-                df = torque_file_to_df(file, sep)
             else:
-                next_df = torque_file_to_df(file, sep)
-                df = pd.concat([df, next_df], ignore_index=True)
+                raise ValueError('\n\tIncorrect file type!')
+            file_paths.append((file, sep))
+
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            file_paths_and_separators = [get_file_and_separator(raw_data_path, file_path) for file_path in file_list]
+            data_frames = list(tqdm(executor.map(torque_file_to_df, file_paths_and_separators), total=len(file_paths_and_separators)))
+
+
+        df = pd.concat(data_frames, ignore_index=True)
         df.sort_values(by=['Date_Time'], ignore_index=True, inplace=True)
 
         # display positive torque
@@ -101,4 +113,5 @@ def get_torque_data(raw_data_path):
             df['Torque, Nm'] = df['Torque, Nm'].multiply(other=-1)
 
         df.to_pickle(os.path.join(raw_data_path, 'FUTEK_data.pickle'))
+
     return df
