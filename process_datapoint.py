@@ -17,7 +17,14 @@ def f(x):
 
 def process_data(data_path, plot=False):
     print(f'Processing data from: {data_path}')
-    
+    #  ---------------- PARAMETERS ----------------  #
+    TORQUE_YLIMS = [0, 1.5]
+    TEMP_DIFF_YLIMS = [-20, 20]
+    TEMP_YLIMS = [30, 150]
+
+    if '_45_' in data_path:
+        TORQUE_YLIMS = [0, 3.0]
+
     if '48hr' in data_path:
         # duration in hrs, padding in mins
         TEST_DURATION = 48
@@ -66,9 +73,9 @@ def process_data(data_path, plot=False):
     axs[1].set_ylabel('Temperature, degC')
     axs[2].set_ylabel('Temperature, degC')
 
-    axs[0].set_ylim(0, 1.5)
-    axs[1].set_ylim(30, 150)
-    axs[2].set_ylim(-20, 20)
+    axs[0].set_ylim(TORQUE_YLIMS[0], TORQUE_YLIMS[1])
+    axs[1].set_ylim(TEMP_YLIMS[0], TEMP_YLIMS[1])
+    axs[2].set_ylim(TEMP_DIFF_YLIMS[0], TEMP_DIFF_YLIMS[1])
 
 
     l1 = axs[0].plot(torque_data["Date_Time"],
