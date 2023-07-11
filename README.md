@@ -8,6 +8,7 @@ See 'importing environments' from conda cheatsheet page 2
     https://docs.conda.io/projects/conda/en/latest/_downloads/843d9e0198f2a193a3484886fa28163c/conda-cheatsheet.pdf
 
 e.g. cun command in anaconda terminal:
+
     'conda env create -n PV_LIMIT --file environment.yml'
 
 ---
@@ -17,6 +18,7 @@ e.g. cun command in anaconda terminal:
 You will need to also download and install Google's Tesseract OCR so that the wrapper library pytesseract can fuction:
 
 tesseract 5 - windows installer:
+
     https://github.com/UB-Mannheim/tesseract/wiki
     
 
