@@ -13,11 +13,18 @@ def XLStoDataframe(raw_data_path, file):
     df = pd.read_csv(os.path.join(raw_data_path, file), sep='\t',
                      parse_dates=[['Date', 'Time']],
                      usecols=['Date', 'Time', 'Value', 'Value.1', 'Value.2', 'Value.3'])
-    df.rename(columns={'Value': 'T1',
-                       'Value.1': 'T2',
-                       'Value.2': 'T3',
-                       'Value.3': 'T4'},
+    # TSSvBABSL test 5-16-24
+    df.rename(columns={'Value': 'T2', # Inlet
+                       'Value.1': 'T1', # Inboard
+                       'Value.2': 'T4', # Outboard
+                       'Value.3': 'T3'}, # Outlet
               inplace=True)
+    # OLD
+    """ df.rename(columns={'Value': 'T1', # Inboard Seal
+                       'Value.1': 'T2', # Inlet
+                       'Value.2': 'T3', # Outlet 
+                       'Value.3': 'T4'}, # Outboard Seal
+              inplace=True) """
     return df
 
 

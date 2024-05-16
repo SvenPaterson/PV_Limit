@@ -10,6 +10,9 @@ from process_Omega import get_Omega_data
 from tkinter import filedialog
 from datetime import timedelta
 
+USE_FLIR = False
+# WHAT TC INPUTS DID YOU PLUG INTO? CUSTOMIZE process_Omega.py
+
 def f(x):
     # convert from F to C
     x = (x - 32) / 1.8
@@ -18,9 +21,9 @@ def f(x):
 def process_data(data_path, plot=False):
     print(f'Processing data from: {data_path}')
     #  ---------------- PARAMETERS ----------------  #
-    TORQUE_YLIMS = [0, 1.5]
-    TEMP_DIFF_YLIMS = [-20, 20]
-    TEMP_YLIMS = [30, 150]
+    TORQUE_YLIMS = [0, 3]
+    TEMP_DIFF_YLIMS = [-10, 10]
+    TEMP_YLIMS = [40, 70]
 
     if '_45_' in data_path:
         TORQUE_YLIMS = [0, 3.0]
@@ -49,12 +52,13 @@ def process_data(data_path, plot=False):
     except:
         raise ValueError('\n\tThermocouple data import unsuccessful\n')
     
-    try:
-        print('\tImporting FLIR Camera data...')
-        flir_data = get_FLIR_data(data_path)
-        print('\t  FLIR Camera image processing/import successful\n')
-    except:
-        raise ValueError('\n\tFLIR Camera image processing/import unsuccessful\n')
+    if USE_FLIR:
+        try:
+            print('\tImporting FLIR Camera data...')
+            flir_data = get_FLIR_data(data_path)
+            print('\t  FLIR Camera image processing/import successful\n')
+        except:
+            raise ValueError('\n\tFLIR Camera image processing/import unsuccessful\n')
     
     try:
         print('\tImporting Torque data...')
@@ -68,10 +72,11 @@ def process_data(data_path, plot=False):
     # fig, [axs[0], axs[1]] = plt.subplots(nrows=2, ncols=1)
     
     fig, axs = plt.subplots(3, 1, figsize=(11, 8.5))
+    # else: fig, axs = plt.subplots(2, 1, figsize=)
     fig.suptitle(os.path.split(data_path)[1])
     axs[0].set_ylabel('Torque, Nm')
     axs[1].set_ylabel('Temperature, degC')
-    axs[2].set_ylabel('Temperature, degC')
+    if USE_FLIR: axs[2].set_ylabel('Temperature, degC')
 
     axs[0].set_ylim(TORQUE_YLIMS[0], TORQUE_YLIMS[1])
     axs[1].set_ylim(TEMP_YLIMS[0], TEMP_YLIMS[1])
@@ -89,10 +94,12 @@ def process_data(data_path, plot=False):
                      color='lime',
                      label=f'SMA{SMA}')
 
-    l3 = axs[1].plot(flir_data["Date_Time"],
-                     flir_data["Temperature, degF"].apply(f),
-                     color='r',
-                     label='Thermal Img')
+    if USE_FLIR:
+        l3 = axs[1].plot(flir_data["Date_Time"],
+                        flir_data["Temperature, degF"].apply(f),
+                        color='r',
+                        label='Thermal Img')
+    else: l3 = 0
 
     l4 = axs[1].plot(omega_data['Date_Time'],
                      omega_data['T1'].apply(f),
@@ -162,9 +169,11 @@ def process_data(data_path, plot=False):
     lns1 = l1+l2
     labs1 = [line.get_label() for line in lns1]
     if TEST_DURATION >= 48:
-        lns2 = l3+l4+l5+l6+l7
+        if USE_FLIR: lns2 = l3+l4+l5+l6+l7
+        else: lns2 = l4+l5+l6+l7
     else:
-        lns2 = l3+l4+l6+l7
+        if USE_FLIR: lns2 = l3+l4+l6+l7
+        else: lns2 = l4+l6+l7
     labs2 = [line.get_label() for line in lns2]
     lns3 = l8
     labs3 = [line.get_label() for line in lns3]

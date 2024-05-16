@@ -6,6 +6,9 @@ import tkinter as tk
 from tkinter import filedialog
 import matplotlib.pyplot as plt
 
+# WHAT TC INPUTS DID YOU PLUG INTO? CUSTOMIZE process_Omega.py
+
+
 # get list of subdirs in a directory and ask user to confirm what subdirs to process
 def get_subdirs(path):
     subdirs = [os.path.join(path, name) for name in os.listdir(path) if os.path.isdir(os.path.join(path, name))]
